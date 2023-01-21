@@ -1,2 +1,2 @@
 # sanadabushi
-- Have a little fun and change from tailwindcss to css.
+- Ideas to convert from tailwindcss to css.
