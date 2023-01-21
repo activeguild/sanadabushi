@@ -1,4 +1,4 @@
-import { useState, useMemo, FocusEvent, ChangeEvent } from "react";
+import { useState, useMemo, FocusEvent, ChangeEvent, useRef } from "react";
 import styles from "./App.module.css";
 import { parse } from "postcss";
 
@@ -6,6 +6,7 @@ function App() {
   const [source, setSource] = useState("");
   const [classesValue, setClassesValue] = useState("");
   const [stylesValue, setStylesValue] = useState("");
+  const ref = useRef<HTMLTextAreaElement>();
 
   const classes = useMemo(() => {
     const root = parse(source);
@@ -65,6 +66,10 @@ function App() {
     setSource(value);
   };
 
+  const hansleStylesFocus = (event: FocusEvent<HTMLTextAreaElement>) => {
+    ref.current?.select();
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.left}>
@@ -89,7 +94,7 @@ function App() {
       </div>
       <div className={styles.right}>
         <h1>output styles</h1>
-        <textarea readOnly value={stylesValue} cols={30} rows={10}></textarea>
+        <textarea ref={ref} onFocus={hansleStylesFocus} readOnly value={stylesValue} cols={30} rows={10}></textarea>
       </div>
     </div>
   );
