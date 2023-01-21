@@ -1,46 +1,96 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import "./App.css";
+import { useState, useMemo, FocusEvent, ChangeEvent } from "react";
+import styles from "./App.module.css";
 import { parse } from "postcss";
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [source, setSource] = useState("");
+  const [classesValue, setClassesValue] = useState("");
+  const [stylesValue, setStylesValue] = useState("");
 
-  var root = parse(`.text-3xl {
-    font-size: 1.875rem;
-    line-height: 2.25rem;
-  }
-  
-  .font-bold {
-    font-weight: 700;
-  }
-  
-  .underline {
-    text-decoration-line: underline;
-  }`);
+  const classes = useMemo(() => {
+    const root = parse(source);
+    let classes = new Map<string, string[]>();
+
+    root.nodes.map((node) => {
+      if (node.type === "rule" && node.selector.startsWith(".")) {
+        const styles = new Array<string>();
+
+        for (const childNode of node.nodes) {
+          if (childNode.type === "decl") {
+            styles.push(`${childNode.prop}: ${childNode.value};`);
+          }
+        }
+
+        classes.set(node.selector.replace(".", ""), styles);
+      }
+    });
+
+    return classes;
+  }, [source]);
+
+  const handleBlur = (event: FocusEvent<HTMLTextAreaElement>) => {
+    const { value } = event.target;
+    let stylesStr = "";
+
+    const inputClasses = value.split(" ");
+
+    for (const inputClass of inputClasses) {
+      if (classes.has(inputClass)) {
+        const matchedStyles = classes.get(inputClass);
+        if (matchedStyles) {
+          for (const matchedStyle of matchedStyles) {
+            stylesStr = `${stylesStr}${matchedStyle};\n`;
+          }
+        }
+      }
+    }
+
+    setStylesValue(stylesStr);
+  };
+
+  const handleClassesValueChange = (
+    event: ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const { value } = event.target;
+    setClassesValue(value);
+  };
+
+  const handleSourceValueChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    const { value } = event.target;
+    setSource(value);
+  };
+
+  const handleSourceBlur = (event: FocusEvent<HTMLTextAreaElement>) => {
+    const { value } = event.target;
+    setSource(value);
+  };
 
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className={styles.container}>
+      <div className={styles.left}>
+        <h1>css</h1>
+        <textarea
+          value={source}
+          cols={30}
+          rows={10}
+          onChange={handleSourceValueChange}
+          onBlur={handleSourceBlur}
+        ></textarea>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+      <div className={styles.center}>
+        <h1>classes</h1>
+        <textarea
+          value={classesValue}
+          cols={30}
+          rows={10}
+          onChange={handleClassesValueChange}
+          onBlur={handleBlur}
+        ></textarea>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <div className={styles.right}>
+        <h1>output styles</h1>
+        <textarea readOnly value={stylesValue} cols={30} rows={10}></textarea>
+      </div>
     </div>
   );
 }
