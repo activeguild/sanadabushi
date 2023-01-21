@@ -39,7 +39,7 @@ function App() {
         const matchedStyles = classes.get(inputClass);
         if (matchedStyles) {
           for (const matchedStyle of matchedStyles) {
-            stylesStr = `${stylesStr}${matchedStyle};\n`;
+            stylesStr = `${stylesStr}${matchedStyle}\n`;
           }
         }
       }
