@@ -1,5 +1,6 @@
 import fs from "fs";
 import postcss from "postcss";
+import {  } from 'tailwindcss/lib/cli';
 
 var css = fs.readFileSync("./dist/output.css");
 var root = postcss.parse(css); // `input.css`をパースしてASTを返す
